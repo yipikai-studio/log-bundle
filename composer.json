@@ -1,0 +1,23 @@
+{
+  "name":                                 "yipikai/log-bundle",
+  "type":                                 "symfony-bundle",
+  "description":                          "Recovery Log by Yipikai service",
+  "keywords":                             ["Symfony", "Log"],
+  "license":                              "MIT",
+  "authors": [
+    {
+      "name":                             "Matthieu Beurel",
+      "email":                            "matthieu@yipikai.studio",
+      "homepage":                         "https://yipikai.studio"
+    }
+  ],
+  "require": {
+    "php":                                ">=7.4",
+    "austral/tools-bundle":               "3.1.*",
+    "fabpot/goutte":                      "4.0.*",
+    "ramsey/uuid":                        "^3.0"
+  },
+  "autoload": {
+    "psr-4": { "Yipikai\\LogBundle\\": "" }
+  }
+}

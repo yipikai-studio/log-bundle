@@ -1,0 +1,16 @@
+yipikai_log:
+  uri:                        ""
+  domain:                     ""
+  enabled:
+    exception:                false
+    doctrine:                 false
+  async:                      false
+  token:
+    public:                   ""
+    private:                  ""
+    salt:                     "YOUR_SALT"
+  excludes:
+    CLASSNAME:
+      all:                    false
+      fields:
+        - fieldname

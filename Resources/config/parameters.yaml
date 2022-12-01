@@ -1,0 +1,5 @@
+parameters:
+
+  ##### Messenger Resolve routing
+  yipikai.resolve.messenger.routing.log:
+    'Yipikai\LogBundle\Message\LogMessage':         [ async ]

@@ -1,0 +1,12 @@
+framework:
+    messenger:
+        failure_transport: failed
+        buses:
+            command_bus:
+                middleware:
+                    - router_context
+        transports:
+            # https://symfony.com/doc/current/messenger.html#transport-configuration
+            async:  '%env(MESSENGER_TRANSPORT_DSN)%'
+            failed: 'doctrine://default?queue_name=failed'
+        routing:
