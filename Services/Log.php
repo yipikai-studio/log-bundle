@@ -319,14 +319,17 @@ class Log
     $body = array();
     $request = $this->container->get('request_stack')->getCurrentRequest();
 
-    $body["object"] = array(
-      "classname"     =>  get_class($object),
-      "values"        =>  $this->objectToArray($object)
-    );
-    $body["doctrine_log_type"] = $doctrineLogType;
-    $body["doctrine_id"] = $doctineId;
-    $body["valuesChanged"] = $valuesChanged;
-    $this->send(self::SEND_DOCTRINE_LOG, $request, $body);
+    if($objectValues = $this->objectToArray($object))
+    {
+      $body["object"] = array(
+        "classname"     =>  get_class($object),
+        "values"        =>  $objectValues
+      );
+      $body["doctrine_log_type"] = $doctrineLogType;
+      $body["doctrine_id"] = $doctineId;
+      $body["valuesChanged"] = $valuesChanged;
+      $this->send(self::SEND_DOCTRINE_LOG, $request, $body);
+    }
   }
 
   /**
