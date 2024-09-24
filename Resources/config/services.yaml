@@ -45,4 +45,4 @@ services:
 
   yipikai.log:
     class:          Yipikai\LogBundle\Services\Log
-    arguments:      [ "@service_container", "@yipikai.log.config", "@?messenger.default_bus" ]
+    arguments:      [ "@service_container", "@yipikai.log.config","@?security.token_storage","@?messenger.default_bus" ]

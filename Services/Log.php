@@ -16,6 +16,7 @@ use Symfony\Component\HttpClient\NativeHttpClient;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -48,6 +49,11 @@ class Log
   protected LogConfiguration $logConfiguration;
 
   /**
+   * @var TokenStorageInterface
+   */
+  protected TokenStorageInterface $tokenStorage;
+
+  /**
    * @var MessageBusInterface|null
    */
   protected ?MessageBusInterface $bus = null;
@@ -63,13 +69,15 @@ class Log
   /**
    * @param ContainerInterface $container
    * @param LogConfiguration $logConfiguration
+   * @param TokenStorageInterface|null $tokenStorage
    * @param MessageBusInterface|null $bus
    */
-  public function __construct(ContainerInterface $container, LogConfiguration $logConfiguration, ?MessageBusInterface $bus)
+  public function __construct(ContainerInterface $container, LogConfiguration $logConfiguration, ?TokenStorageInterface $tokenStorage, ?MessageBusInterface $bus)
   {
     $this->container = $container;
     $this->logConfiguration = $logConfiguration;
     $this->bus = $bus;
+    $this->tokenStorage = $tokenStorage;
     $this->excludes = array_key_exists("excludes", $this->logConfiguration->allConfig()) ? $this->logConfiguration->allConfig()["excludes"] : array();
   }
 
@@ -238,7 +246,7 @@ class Log
     {
       if($this->container->get('security.authorization_checker')->isGranted("IS_AUTHENTICATED"))
       {
-        if($token = $this->container->get("security.token_storage")->getToken())
+        if($token = $this->tokenStorage->getToken())
         {
           $body["user"] = array(
             "roles"           =>  $token->getRoleNames(),
