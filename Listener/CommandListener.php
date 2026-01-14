@@ -65,7 +65,7 @@ class CommandListener
   {
     $logEvent = new LogEvent();
     $logEvent->setType("error");
-    $logEvent->setIsEnabled($this->logConfiguration->get('enabled.exception'));
+    $logEvent->setIsEnabled((bool) $this->logConfiguration->get('enabled.exception'));
     $this->dispatcher?->dispatch($logEvent, LogEvent::EVENT_YIPIKAI_LOG_ENABLED);
     if($logEvent->getIsEnabled()) {
       try {

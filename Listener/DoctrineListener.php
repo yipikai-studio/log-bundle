@@ -124,7 +124,7 @@ class DoctrineListener implements EventSubscriber
   {
     $logEvent = new LogEvent();
     $logEvent->setType("doctrine.{$type}");
-    $logEvent->setIsEnabled($this->logConfiguration->get('enabled.doctrine'));
+    $logEvent->setIsEnabled((bool) $this->logConfiguration->get('enabled.doctrine'));
     $this->dispatcher?->dispatch($logEvent, LogEvent::EVENT_YIPIKAI_LOG_ENABLED);
     if($logEvent->getIsEnabled()) {
       try {
