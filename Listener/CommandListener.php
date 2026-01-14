@@ -12,6 +12,7 @@ namespace Yipikai\LogBundle\Listener;
 
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -29,30 +30,15 @@ class CommandListener
 {
 
   /**
-   * @var Log
-   */
-  protected Log $log;
-
-  /**
-   * @var LogConfiguration
-   */
-  protected LogConfiguration $logConfiguration;
-
-  /**
-   * @var EventDispatcherInterface|null
-   */
-  protected ?EventDispatcherInterface $dispatcher = null;
-
-  /**
    * @param Log $log
    * @param LogConfiguration $logConfiguration
    * @param EventDispatcherInterface|null $dispatcher
    */
-  public function __construct(Log $log, LogConfiguration $logConfiguration, ?EventDispatcherInterface $dispatcher)
+  public function __construct(
+    #[Autowire(service: "yipikai.log")] protected Log $log,
+    #[Autowire(service: "yipikai.log.config")] protected LogConfiguration $logConfiguration,
+    #[Autowire(service: "event_dispatcher")] protected ?EventDispatcherInterface $dispatcher)
   {
-    $this->log = $log;
-    $this->logConfiguration = $logConfiguration;
-    $this->dispatcher = $dispatcher;
   }
 
   /**
@@ -60,7 +46,7 @@ class CommandListener
    *
    * @return void
    */
-  public function initiliaze(ConsoleCommandEvent $event)
+  public function initialize(ConsoleCommandEvent $event): void
   {
     if($this->logConfiguration->get('enabled.doctrine') || $this->logConfiguration->get('enabled.exception')) {
       try {
@@ -70,23 +56,17 @@ class CommandListener
     }
   }
 
-
-
   /**
    * @param ConsoleErrorEvent $event
    *
    * @return void
    */
-  public function error(ConsoleErrorEvent $event)
+  public function error(ConsoleErrorEvent $event): void
   {
     $logEvent = new LogEvent();
     $logEvent->setType("error");
     $logEvent->setIsEnabled($this->logConfiguration->get('enabled.exception'));
-    if($this->dispatcher)
-    {
-      $this->dispatcher->dispatch($logEvent, LogEvent::EVENT_YIPIKAI_LOG_ENABLED);
-    }
-
+    $this->dispatcher?->dispatch($logEvent, LogEvent::EVENT_YIPIKAI_LOG_ENABLED);
     if($logEvent->getIsEnabled()) {
       try {
         $this->log->sendError($event->getError());

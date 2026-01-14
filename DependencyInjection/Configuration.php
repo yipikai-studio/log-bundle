@@ -64,7 +64,7 @@ class Configuration implements ConfigurationInterface
    *
    * @return mixed
    */
-  protected function buildExcludeNode(ArrayNodeDefinition $node)
+  protected function buildExcludeNode(ArrayNodeDefinition $node): mixed
   {
     $node = $node
       ->children()
@@ -96,10 +96,6 @@ class Configuration implements ConfigurationInterface
       ),
     );
   }
-
-
-
-
 
 
 }

@@ -11,6 +11,7 @@
 namespace Yipikai\LogBundle\Services;
 
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpClient\NativeHttpClient;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,26 +39,6 @@ class Log
   const SEND_ERROR = "error";
   const SEND_DOCTRINE_LOG = "doctrine";
 
-  /**
-   * @var ContainerInterface
-   */
-  protected ContainerInterface $container;
-
-  /**
-   * @var LogConfiguration
-   */
-  protected LogConfiguration $logConfiguration;
-
-  /**
-   * @var TokenStorageInterface
-   */
-  protected TokenStorageInterface $tokenStorage;
-
-  /**
-   * @var MessageBusInterface|null
-   */
-  protected ?MessageBusInterface $bus = null;
-
   /** @var ConsoleCommandEvent|null */
   protected ?ConsoleCommandEvent $consoleCommandEvent = null;
 
@@ -69,15 +50,15 @@ class Log
   /**
    * @param ContainerInterface $container
    * @param LogConfiguration $logConfiguration
-   * @param TokenStorageInterface|null $tokenStorage
+   * @param TokenStorageInterface $tokenStorage
    * @param MessageBusInterface|null $bus
    */
-  public function __construct(ContainerInterface $container, LogConfiguration $logConfiguration, ?TokenStorageInterface $tokenStorage, ?MessageBusInterface $bus)
+  public function __construct(
+    #[Autowire(service: "service_container")] protected ContainerInterface $container,
+    #[Autowire(service: "yipikai.log.config")] protected  LogConfiguration $logConfiguration,
+    #[Autowire(service: "security.token_storage")] protected TokenStorageInterface $tokenStorage,
+    #[Autowire(service: "messenger.default_bus")] protected ?MessageBusInterface $bus = null)
   {
-    $this->container = $container;
-    $this->logConfiguration = $logConfiguration;
-    $this->bus = $bus;
-    $this->tokenStorage = $tokenStorage;
     $this->excludes = array_key_exists("excludes", $this->logConfiguration->allConfig()) ? $this->logConfiguration->allConfig()["excludes"] : array();
   }
 
@@ -101,7 +82,7 @@ class Log
    * @throws RedirectionExceptionInterface
    * @throws ServerExceptionInterface
    */
-  protected function send(string $typeSend, ?Request $request = null, array $body = array())
+  protected function send(string $typeSend, ?Request $request = null, array $body = array()): void
   {
     if($typeSend === self::SEND_ERROR || $typeSend === self::SEND_DOCTRINE_LOG)
     {
@@ -153,7 +134,7 @@ class Log
    * @throws RedirectionExceptionInterface
    * @throws ServerExceptionInterface
    */
-  public function sendRequest(string $uri, string $method = "POST", array $requestParameters = array())
+  public function sendRequest(string $uri, string $method = "POST", array $requestParameters = array()): mixed
   {
     try {
       $httpClient = new NativeHttpClient();
@@ -214,7 +195,7 @@ class Log
         "kernel"    =>  array(
           "env"           =>  $kernel->getEnvironment(),
           "isDebug"       =>  $kernel->isDebug(),
-          "projectDir"    =>  $kernel->getProjectDir(),
+          "projectDir"    =>  $this->container->getParameter('kernel.root_dir'),
         )
       );
       $body["commandInput"] = array(
@@ -322,7 +303,7 @@ class Log
    * @throws RedirectionExceptionInterface
    * @throws ServerExceptionInterface
    */
-  public function sendDoctrineLog($object, array $valuesChanged = array(), string $doctineId = null, string $doctrineLogType = self::DOCTRINE_LOG_CREATE)
+  public function sendDoctrineLog($object, array $valuesChanged = array(), string $doctineId = null, string $doctrineLogType = self::DOCTRINE_LOG_CREATE): void
   {
     $body = array();
     $request = $this->container->get('request_stack')->getCurrentRequest();
@@ -349,7 +330,7 @@ class Log
    * @throws ServerExceptionInterface
    * @throws \Exception
    */
-  public function sendError(\Throwable $exception, ?Request $request = null)
+  public function sendError(\Throwable $exception, ?Request $request = null): void
   {
     $body = array(
       "exception" => array(

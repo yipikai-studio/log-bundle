@@ -1,48 +1,47 @@
 services:
   _defaults:
-    public:        true
-
+    autowire:       true
+    autoconfigure:  true
+    public:         true
 
 ##### Event Subscriber
-  yipikai.log.event_subscriber:
-    class:          Yipikai\LogBundle\EventSubscriber\LogEventSubscriber
+  Yipikai\LogBundle\EventSubscriber\LogEventSubscriber:
     tags:
       - { name: kernel.event_subscriber }
+  yipikai.log.event_subscriber:
+    alias:          Yipikai\LogBundle\EventSubscriber\LogEventSubscriber
 
 ##### Log Listener
-
-  yipikai.log.command.listener:
-    class:          Yipikai\LogBundle\Listener\CommandListener
-    arguments:      ["@yipikai.log", "@yipikai.log.config", "@?event_dispatcher"]
+  Yipikai\LogBundle\Listener\CommandListener:
     tags:
-      - { name: kernel.event_listener, event: console.command, method: initiliaze, priority: 2048 }
+      - { name: kernel.event_listener, event: console.command, method: initialize, priority: 2048 }
       - { name: kernel.event_listener, event: console.error, method: error, priority: 2048 }
+  yipikai.log.command.listener:
+    alias:          Yipikai\LogBundle\Listener\CommandListener
 
-  yipikai.log.execption.listener:
-    class:          Yipikai\LogBundle\Listener\ExceptionListener
-    arguments:      ["@yipikai.log", "@yipikai.log.config", "@?event_dispatcher"]
+  Yipikai\LogBundle\Listener\ExceptionListener:
     tags:
       - { name: kernel.event_listener, event: kernel.exception, method: execute, priority: 2048 }
+  yipikai.log.execption.listener:
+    alis:           Yipikai\LogBundle\Listener\ExceptionListener
 
-  yipikai.log.doctrine.listener:
-    class:          Yipikai\LogBundle\Listener\DoctrineListener
-    arguments:      ["@yipikai.log", "@yipikai.log.config", "@?event_dispatcher"]
+  Yipikai\LogBundle\Listener\DoctrineListener:
     tags:
       - { name: doctrine.event_subscriber, connection: default }
+  yipikai.log.doctrine.listener:
+    alias:          Yipikai\LogBundle\Listener\DoctrineListener
 
 ##### Messenger
+  Yipikai\LogBundle\Message\LogMessageHandler:  ~
   yipikai.log.message_handler:
-    class:          Yipikai\LogBundle\Message\LogMessageHandler
-    arguments:      [ "@yipikai.log" ]
-    tags:
-      - name:       messenger.message_handler
-        handles:    Yipikai\LogBundle\Message\LogMessage
+    alias:          Yipikai\LogBundle\Message\LogMessageHandler
 
 ##### Configuration
+  Yipikai\LogBundle\Configuration\LogConfiguration: ~
   yipikai.log.config:
-    class:          Yipikai\LogBundle\Configuration\LogConfiguration
-    arguments:      [ "%yipikai_log%" ]
+    alias:          Yipikai\LogBundle\Configuration\LogConfiguration
 
+  Yipikai\LogBundle\Services\Log: ~
   yipikai.log:
-    class:          Yipikai\LogBundle\Services\Log
-    arguments:      [ "@service_container", "@yipikai.log.config","@?security.token_storage","@?messenger.default_bus" ]
+    alias:          Yipikai\LogBundle\Services\Log
+

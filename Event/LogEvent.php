@@ -30,6 +30,10 @@ class LogEvent
    */
   protected bool $isEnabled = false;
 
+
+  /**
+   * LogEvent constructor
+   */
   public function __construct()
   {
 
