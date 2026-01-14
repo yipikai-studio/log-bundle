@@ -11,6 +11,7 @@
 
 namespace Yipikai\LogBundle\Message;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -26,22 +27,18 @@ class LogMessageHandler implements MessageHandlerInterface
 {
 
   /**
-   * @var Log
+   * LogMessageHandler constructor.
    */
-  protected Log $log;
-
-  /**
-   * LogSenderMessageHandler constructor.
-   */
-  public function __construct(Log $log)
+  public function __construct(
+    #[Autowire(service: "yipikai.log")] protected Log $log
+  )
   {
-    $this->log = $log;
   }
 
   /**
    * @param LogMessage $logMessage
    */
-  public function __invoke(LogMessage $logMessage)
+  public function __invoke(LogMessage $logMessage): void
   {
     try {
       $this->log->sendRequest($logMessage->getUri(), $logMessage->getMethod(), $logMessage->getRequestParameters());

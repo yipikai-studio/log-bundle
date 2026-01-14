@@ -10,6 +10,7 @@
 
 namespace Yipikai\LogBundle\Listener;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -28,30 +29,15 @@ class ExceptionListener
 {
 
   /**
-   * @var Log
-   */
-  protected Log $log;
-
-  /**
-   * @var LogConfiguration
-   */
-  protected LogConfiguration $logConfiguration;
-
-  /**
-   * @var EventDispatcherInterface|null
-   */
-  protected ?EventDispatcherInterface $dispatcher;
-
-  /**
    * @param Log $log
    * @param LogConfiguration $logConfiguration
    * @param EventDispatcherInterface|null $dispatcher
    */
-  public function __construct(Log $log, LogConfiguration $logConfiguration, ?EventDispatcherInterface $dispatcher)
+  public function __construct(
+    #[Autowire(service: "yipikai.log")] protected Log $log,
+    #[Autowire(service: "yipikai.log.config")] protected LogConfiguration $logConfiguration,
+    #[Autowire(service: "event_dispatcher")] protected ?EventDispatcherInterface $dispatcher)
   {
-    $this->log = $log;
-    $this->logConfiguration = $logConfiguration;
-    $this->dispatcher = $dispatcher;
   }
 
   /**
@@ -59,16 +45,12 @@ class ExceptionListener
    *
    * @return void
    */
-  public function execute(ExceptionEvent $event)
+  public function execute(ExceptionEvent $event): void
   {
     $logEvent = new LogEvent();
     $logEvent->setType("error");
     $logEvent->setIsEnabled($this->logConfiguration->get('enabled.exception'));
-    if($this->dispatcher)
-    {
-      $this->dispatcher->dispatch($logEvent, LogEvent::EVENT_YIPIKAI_LOG_ENABLED);
-    }
-
+    $this->dispatcher?->dispatch($logEvent, LogEvent::EVENT_YIPIKAI_LOG_ENABLED);
     if($logEvent->getIsEnabled()) {
       try {
         $this->log->sendError($event->getThrowable(), $event->getRequest());
@@ -76,6 +58,5 @@ class ExceptionListener
       }
     }
   }
-
 
 }

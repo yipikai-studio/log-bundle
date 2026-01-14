@@ -16,6 +16,7 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Events;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -33,44 +34,29 @@ class DoctrineListener implements EventSubscriber
 {
 
   /**
-   * @var Log
-   */
-  protected Log $log;
-
-  /**
-   * @var LogConfiguration
-   */
-  protected LogConfiguration $logConfiguration;
-
-  /**
    * @var string
    */
   protected string $doctrineId;
 
-  /**
-   * @var EventDispatcherInterface|null
-   */
-  protected ?EventDispatcherInterface $dispatcher;
 
   /**
    * @param Log $log
    * @param LogConfiguration $logConfiguration
    * @param EventDispatcherInterface|null $dispatcher
-   *
    * @throws \Exception
    */
-  public function __construct(Log $log, LogConfiguration $logConfiguration, ?EventDispatcherInterface $dispatcher)
+  public function __construct(
+    #[Autowire(service: "yipikai.log")] protected Log $log,
+    #[Autowire(service: "yipikai.log.config")] protected LogConfiguration $logConfiguration,
+    #[Autowire(service: "event_dispatcher")] protected ?EventDispatcherInterface $dispatcher)
   {
-    $this->log = $log;
-    $this->logConfiguration = $logConfiguration;
     $this->doctrineId = Uuid::uuid4()->toString();
-    $this->dispatcher = $dispatcher;
   }
 
   /**
    * @return string[]
    */
-  public function getSubscribedEvents()
+  public function getSubscribedEvents(): array
   {
     return array(
       Events::postPersist,
@@ -129,15 +115,12 @@ class DoctrineListener implements EventSubscriber
    *
    * @return void
    */
-  protected function sendDoctrineLog($object, string $type = Log::DOCTRINE_LOG_CREATE)
+  protected function sendDoctrineLog($object, string $type = Log::DOCTRINE_LOG_CREATE): void
   {
     $logEvent = new LogEvent();
     $logEvent->setType("doctrine.{$type}");
     $logEvent->setIsEnabled($this->logConfiguration->get('enabled.doctrine'));
-    if($this->dispatcher)
-    {
-      $this->dispatcher->dispatch($logEvent, LogEvent::EVENT_YIPIKAI_LOG_ENABLED);
-    }
+    $this->dispatcher?->dispatch($logEvent, LogEvent::EVENT_YIPIKAI_LOG_ENABLED);
     if($logEvent->getIsEnabled()) {
       try {
         $this->log->sendDoctrineLog($object, $this->valuesChanged, $this->doctrineId, $type);

@@ -29,7 +29,7 @@ class YipikaiLogExtension extends Extension
    * {@inheritdoc}
    * @throws Exception
    */
-  public function load(array $configs, ContainerBuilder $container)
+  public function load(array $configs, ContainerBuilder $container): void
   {
     $configuration = new Configuration();
     $config = $this->processConfiguration($configuration, $configs);
@@ -48,7 +48,7 @@ class YipikaiLogExtension extends Extension
    *
    * @throws Exception
    */
-  public function prepend(ContainerBuilder $container)
+  public function prepend(ContainerBuilder $container): void
   {
     if (interface_exists(MessageBusInterface::class)) {
       $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
