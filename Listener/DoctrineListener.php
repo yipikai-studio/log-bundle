@@ -10,6 +10,7 @@
 
 namespace Yipikai\LogBundle\Listener;
 
+use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
@@ -30,6 +31,10 @@ use Yipikai\LogBundle\Services\Log;
  * @author Matthieu Beurel <matthieu@yipikai.studio>
  * @final
  */
+#[AsDoctrineListener(event: 'postPersist', connection: 'default')]
+#[AsDoctrineListener(event: 'preUpdate', connection: 'default')]
+#[AsDoctrineListener(event: 'postUpdate', connection: 'default')]
+#[AsDoctrineListener(event: 'postRemove', connection: 'default')]
 class DoctrineListener implements EventSubscriber
 {
 

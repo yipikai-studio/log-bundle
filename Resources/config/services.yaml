@@ -44,3 +44,4 @@ services:
   Yipikai\LogBundle\Services\Log: ~
   yipikai.log:
     alias:          Yipikai\LogBundle\Services\Log
+
