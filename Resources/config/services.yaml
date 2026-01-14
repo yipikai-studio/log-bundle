@@ -23,7 +23,7 @@ services:
     tags:
       - { name: kernel.event_listener, event: kernel.exception, method: execute, priority: 2048 }
   yipikai.log.execption.listener:
-    alis:           Yipikai\LogBundle\Listener\ExceptionListener
+    alias:           Yipikai\LogBundle\Listener\ExceptionListener
 
   Yipikai\LogBundle\Listener\DoctrineListener:
     tags:
